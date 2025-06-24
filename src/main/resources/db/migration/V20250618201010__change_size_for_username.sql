@@ -1,0 +1,1 @@
+ALTER TABLE rh_user ALTER COLUMN username TYPE varchar(100);

@@ -1,0 +1,23 @@
+spring:
+    application:
+        name: rhsystemapi
+    datasource:
+        url: jdbc:postgresql://localhost:5432/rhsystem
+        username: rhsystem
+        password: rhsystem
+    mail:
+      host: smtp.gmail.com
+      port: 587
+      username: joaohenriquetdj@gmail.com
+      password: liduwtmfyjsqeron
+      test-connection: true
+      properties:
+        mail:
+          smtp:
+            auth: true
+            starttls:
+              enable: true
+ 
+springdoc:
+  api-docs:
+    path: /api-docs
