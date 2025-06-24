@@ -1,5 +1,7 @@
 package com.rhsystem.api.rhsystemapi.core;
 
+import com.rhsystem.api.rhsystemapi.core.valueobject.DomainEntity;
+
 import java.util.stream.StreamSupport;
 
 /**
@@ -8,7 +10,7 @@ import java.util.stream.StreamSupport;
  * @param <D> the type of the domain object
  * @param <E> the type of the entity
  */
-public abstract class ObjectMapper<D, E> {
+public abstract class ObjectMapper<D extends DomainEntity, E> {
 
     /**
      * Converts an entity object to its corresponding domain object.

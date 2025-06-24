@@ -3,17 +3,11 @@ package com.rhsystem.api.rhsystemapi.domain.user.event;
 import com.rhsystem.api.rhsystemapi.core.event.DomainEvent;
 import com.rhsystem.api.rhsystemapi.domain.user.User;
 
-public class UserCreatedEvent extends DomainEvent {
-
-    private final User user;
+public class UserCreatedEvent extends DomainEvent<User> {
 
     public UserCreatedEvent(User user) {
-        super(user.getKey());
-        this.user = user;
+        super(user);
     }
 
-    public User getUser() {
-        return this.user;
-    }
 
 }

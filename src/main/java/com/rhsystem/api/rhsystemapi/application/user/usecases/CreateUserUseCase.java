@@ -2,11 +2,12 @@ package com.rhsystem.api.rhsystemapi.application.user.usecases;
 
 import com.rhsystem.api.rhsystemapi.application.user.http.presenters.UserCreatedPresenter;
 import com.rhsystem.api.rhsystemapi.application.user.requests.CreateUserRequest;
+import com.rhsystem.api.rhsystemapi.core.event.EventDispatcher;
 import com.rhsystem.api.rhsystemapi.core.exception.ValidationException;
 import com.rhsystem.api.rhsystemapi.domain.user.User;
 import com.rhsystem.api.rhsystemapi.domain.user.UserRepository;
+import com.rhsystem.api.rhsystemapi.domain.user.UserStatus;
 import com.rhsystem.api.rhsystemapi.domain.user.event.UserCreatedEvent;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -29,7 +30,7 @@ public class CreateUserUseCase {
      */
     private final PasswordEncoder passwordEncoder;
 
-    private final ApplicationEventPublisher eventPublisher;
+    private final EventDispatcher eventPublisher;
 
     /**
      * Constructs a CreateUserUseCase with the specified user repository and password encoder.
@@ -37,7 +38,7 @@ public class CreateUserUseCase {
      * @param userRepository  the repository for accessing user data
      * @param passwordEncoder the password encoder for encoding user passwords
      */
-    public CreateUserUseCase(UserRepository userRepository, PasswordEncoder passwordEncoder, ApplicationEventPublisher eventPublisher) {
+    public CreateUserUseCase(UserRepository userRepository, PasswordEncoder passwordEncoder, EventDispatcher eventPublisher) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.eventPublisher = eventPublisher;
@@ -60,9 +61,7 @@ public class CreateUserUseCase {
 
         User u = this.createUser(request);
 
-        UserCreatedEvent e = new UserCreatedEvent(u);
-
-        eventPublisher.publishEvent(e);
+        eventPublisher.dispatch(new UserCreatedEvent(u));
 
         var result = new UserCreatedPresenter();
         result.setUsername(u.getUserName());
@@ -89,6 +88,7 @@ public class CreateUserUseCase {
         u.setEmail(request.getEmail());
         u.setPassword(this.passwordEncoder.encode(request.getPassword()));
         u.setUserName(this.generateUniqueUsername(request.getName()));
+        u.setStatus(UserStatus.PENDING);
         return this.userRepository.save(u);
     }
 

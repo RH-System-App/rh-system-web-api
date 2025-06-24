@@ -17,6 +17,7 @@ public class UserMapper extends ObjectMapper<User, UserEntity> {
         u.setEmail(entity.getEmail());
         u.setUserName(entity.getUserName());
         u.setPassword(entity.getPassword());
+        u.setStatus(entity.getStatus());
         return u;
     }
 
@@ -30,6 +31,7 @@ public class UserMapper extends ObjectMapper<User, UserEntity> {
         entity.setEmail(domain.getEmail());
         entity.setUserName(domain.getUserName());
         entity.setPassword(domain.getPassword());
+        entity.setStatus(domain.getStatus());
         return entity;
     }
 

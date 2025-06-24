@@ -1,53 +1,57 @@
 package com.rhsystem.api.rhsystemapi.application.auth.recoverpassword.usecases;
 
 import com.rhsystem.api.rhsystemapi.application.auth.recoverpassword.requests.RecoverPasswordRequest;
-import com.rhsystem.api.rhsystemapi.application.persistence.repositories.PasswordRecoverRepository;
-import com.rhsystem.api.rhsystemapi.core.mail.ApplicationMailSender;
+import com.rhsystem.api.rhsystemapi.domain.recoverpassword.RecoverPassword;
+import com.rhsystem.api.rhsystemapi.domain.recoverpassword.RecoverPasswordRepository;
+import com.rhsystem.api.rhsystemapi.domain.recoverpassword.event.RecoverCreatedEvent;
+import com.rhsystem.api.rhsystemapi.domain.user.User;
 import com.rhsystem.api.rhsystemapi.domain.user.UserRepository;
+import com.rhsystem.api.rhsystemapi.infrastructure.event.ApplicationEventDispatcher;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Component
 public class RecoverPasswordUseCase {
 
-
     private final UserRepository userRepository;
-    private final PasswordRecoverRepository passwordRecoverRepository;
+    private final RecoverPasswordRepository recoverPasswordRepository;
 
-    private final ApplicationMailSender mailSender;
+    private final ApplicationEventDispatcher eventPublisher;
 
-    public RecoverPasswordUseCase(UserRepository userRepository, PasswordRecoverRepository passwordRecoverRepository,
-                                  ApplicationMailSender mailSender) {
+//    private final ApplicationMailSender mailSender;
+
+    public RecoverPasswordUseCase(UserRepository userRepository,
+                                  RecoverPasswordRepository recoverPasswordRepository,
+                                  ApplicationEventDispatcher eventPublisher) {
         this.userRepository = userRepository;
-        this.passwordRecoverRepository = passwordRecoverRepository;
-        this.mailSender = mailSender;
+        this.recoverPasswordRepository = recoverPasswordRepository;
+        this.eventPublisher = eventPublisher;
     }
 
 
     public void handle(RecoverPasswordRequest request) {
         var userByEmail = this.userRepository.findByEmail(request.getEmail());
         userByEmail.ifPresent(user -> {
-//            var existingRecover = this.passwordRecoverRepository.findByUser(user);
-//            existingRecover.ifPresent(this.passwordRecoverRepository::delete);
-//            PasswordRecover recover = this.createRecoverByUser(user);
-//            this.sendMessageToUser(user, recover);
+            var existingRecover = this.recoverPasswordRepository.findByUser(user);
+            existingRecover.ifPresent(this.recoverPasswordRepository::delete);
+            RecoverPassword recover = this.createRecoverByUser(user);
+            eventPublisher.dispatch(createRecoverEvent(recover));
         });
     }
 
-//    private void sendMessageToUser(User user, PasswordRecover recover) {
-//        try {
-//            Map<String, Object> values = Map.of("code", recover.getRecoverCode());
-//            this.mailSender.sendMail(user.getEmail(), "recover_password_mail", values);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
+    private RecoverCreatedEvent createRecoverEvent(RecoverPassword recover) {
+        return new RecoverCreatedEvent(recover);
+    }
 
 
-//    private PasswordRecover createRecoverByUser(User user) {
-//        var passwordRecover = new PasswordRecover();
-//        passwordRecover.setUser(user);
-//        LocalDateTime expirationDate = LocalDateTime.now().plusMinutes(30);
-//        passwordRecover.setExpirationDate(expirationDate);
-//        return this.passwordRecoverRepository.save(passwordRecover);
-//    }
+    private RecoverPassword createRecoverByUser(User user) {
+        var passwordRecover = new RecoverPassword();
+        passwordRecover.setUser(user);
+        LocalDateTime expirationDate = LocalDateTime.now().plusMinutes(30);
+        passwordRecover.setExpirationDate(expirationDate);
+        passwordRecover.setRecoverCode(UUID.randomUUID());
+        return this.recoverPasswordRepository.save(passwordRecover);
+    }
 }

@@ -1,5 +1,6 @@
 package com.rhsystem.api.rhsystemapi.infrastructure.persistence.user;
 
+import com.rhsystem.api.rhsystemapi.domain.user.UserStatus;
 import jakarta.persistence.*;
 
 import java.util.UUID;
@@ -38,6 +39,10 @@ public class UserEntity {
      */
     @Column(name = "PASSWORD")
     private String password;
+
+    @Column(name = "USER_STATUS", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private UserStatus status;
 
     /**
      * Gets the unique identifier of the user.
@@ -128,5 +133,13 @@ public class UserEntity {
      */
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public UserStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(UserStatus status) {
+        this.status = status;
     }
 }

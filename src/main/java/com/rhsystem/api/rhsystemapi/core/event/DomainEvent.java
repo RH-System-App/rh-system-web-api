@@ -1,5 +1,6 @@
 package com.rhsystem.api.rhsystemapi.core.event;
 
+import com.rhsystem.api.rhsystemapi.core.valueobject.DomainEntity;
 import com.rhsystem.api.rhsystemapi.core.valueobject.EntityKey;
 
 import java.time.LocalDateTime;
@@ -7,7 +8,7 @@ import java.time.LocalDateTime;
 /**
  * Represents a domain event in the system.
  */
-public class DomainEvent {
+public abstract class DomainEvent<T extends DomainEntity> {
 
     /**
      * Represents the unique identifier of the aggregate associated with this domain event.
@@ -15,7 +16,9 @@ public class DomainEvent {
      * is immutable and tied to a specific entity through a UUID value. This identifier enables
      * tracking of the specific aggregate instance that the event pertains to.
      */
-    private final EntityKey aggregateId;
+
+    private final T domainEntity;
+
 
     /**
      * Represents the timestamp at which the domain event occurred. This value is immutable
@@ -24,14 +27,9 @@ public class DomainEvent {
      */
     private final LocalDateTime occurredOn = LocalDateTime.now();
 
-    /**
-     * Constructs a DomainEvent with the specified aggregate ID.
-     *
-     * @param aggregateId the unique identifier of the aggregate associated
-     *                    with this domain event, encapsulated in an {@link EntityKey}
-     */
-    protected DomainEvent(EntityKey aggregateId) {
-        this.aggregateId = aggregateId;
+
+    public DomainEvent(T domainEntity) {
+        this.domainEntity = domainEntity;
     }
 
     /**
@@ -40,7 +38,10 @@ public class DomainEvent {
      * @return the unique identifier of the aggregate encapsulated as an {@link EntityKey}
      */
     public EntityKey getAggregateId() {
-        return this.aggregateId;
+        if (domainEntity == null) {
+            return null;
+        }
+        return this.domainEntity.getKey();
     }
 
     /**
@@ -52,4 +53,7 @@ public class DomainEvent {
         return this.occurredOn;
     }
 
+    public T getDomainEntity() {
+        return domainEntity;
+    }
 }

@@ -1,16 +1,12 @@
 package com.rhsystem.api.rhsystemapi.domain.user;
 
-import com.rhsystem.api.rhsystemapi.core.valueobject.EntityKey;
+import com.rhsystem.api.rhsystemapi.core.valueobject.DomainEntity;
 
 /**
  * Represents a user in the system. This class serves as a domain entity that encapsulates
  * the key attributes and functionality related to a user.
  */
-public class User {
-    /**
-     * The unique identifier for the user. This field is automatically generated as a UUID.
-     */
-    private EntityKey key;
+public class User extends DomainEntity {
 
     /**
      * The name of the user. This field is mapped to the "NAME" column in the database.
@@ -32,13 +28,7 @@ public class User {
      */
     private String password;
 
-    public EntityKey getKey() {
-        return this.key;
-    }
-
-    public void setKey(EntityKey key) {
-        this.key = key;
-    }
+    private UserStatus status;
 
     /**
      * Gets the name of the user.
@@ -112,10 +102,18 @@ public class User {
         this.userName = userName;
     }
 
+    public UserStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(UserStatus status) {
+        this.status = status;
+    }
+
     @Override
     public String toString() {
         return "User{" +
-                "key=" + key +
+                "key=" + getKey().getValue() +
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
                 ", userName='" + userName + '\'' +

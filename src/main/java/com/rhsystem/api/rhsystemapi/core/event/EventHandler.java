@@ -6,7 +6,7 @@ package com.rhsystem.api.rhsystemapi.core.event;
  * @param <T> the type of domain event that this handler will process. It extends {@link DomainEvent},
  *            ensuring that only valid domain events are handled.
  */
-public interface EventHandler<T extends DomainEvent> {
+public interface EventHandler<T extends DomainEvent<?>> {
 
     /**
      * Handles the specified domain event. This method is responsible for processing
