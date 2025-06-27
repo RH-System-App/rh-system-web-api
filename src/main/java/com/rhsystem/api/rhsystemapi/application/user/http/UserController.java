@@ -2,6 +2,7 @@ package com.rhsystem.api.rhsystemapi.application.user.http;
 
 import com.rhsystem.api.rhsystemapi.application.user.http.presenters.UserPresenter;
 import com.rhsystem.api.rhsystemapi.application.user.requests.CreateUserRequest;
+import com.rhsystem.api.rhsystemapi.application.user.usecases.BlockUserUseCase;
 import com.rhsystem.api.rhsystemapi.application.user.usecases.CreateUserUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -30,12 +31,21 @@ public class UserController {
     private final CreateUserUseCase createUserUseCase;
 
     /**
+     * Use case for blocking a user account. This instance is responsible for handling
+     * the business logic related to locking a user's account based on their username.
+     * It is utilised in user-related operations where account status management
+     * is required.
+     */
+    private final BlockUserUseCase blockUserUseCase;
+
+    /**
      * Constructs a UserController with the specified CreateUserUseCase.
      *
      * @param createUserUseCase the use case for creating a new user
      */
-    public UserController(final CreateUserUseCase createUserUseCase) {
+    public UserController(final CreateUserUseCase createUserUseCase, BlockUserUseCase blockUserUseCase) {
         this.createUserUseCase = createUserUseCase;
+        this.blockUserUseCase = blockUserUseCase;
     }
 
     /**
@@ -60,11 +70,20 @@ public class UserController {
     @PostMapping
     @Operation(summary = "Cria um novo usuário")
     @ApiResponse(responseCode = "201", description = "Usuário criado com sucesso.")
-    public ResponseEntity<Void> postMethodName(@RequestBody @Valid CreateUserRequest entity) {
+    public ResponseEntity<Void> createUser(@RequestBody @Valid CreateUserRequest entity) {
         var result = this.createUserUseCase.handle(entity);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{username}")
                                              .buildAndExpand(result.getUsername()).toUri();
         return ResponseEntity.created(uri).build();
+    }
+
+
+    @PutMapping("{username}/lock")
+    @Operation(summary = "Realiza o bloqueio de um usuario")
+    @ApiResponse(responseCode = "204", description = "Usuário bloqueado com sucesso")
+    public ResponseEntity<Void> blockUser(@PathVariable("username") String username) {
+        this.blockUserUseCase.handle(username);
+        return ResponseEntity.noContent().build();
     }
 
 

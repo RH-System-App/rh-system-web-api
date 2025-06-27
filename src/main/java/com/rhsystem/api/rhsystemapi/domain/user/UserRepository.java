@@ -15,4 +15,8 @@ public interface UserRepository {
     boolean existsByUserName(String userName);
 
     Optional<User> findByEmail(String email);
+
+    void updateStatus(User user, UserStatus status);
+
+    Optional<User> findByUserName(String userName);
 }

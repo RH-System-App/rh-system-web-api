@@ -10,6 +10,7 @@ import com.rhsystem.api.rhsystemapi.domain.user.UserStatus;
 import com.rhsystem.api.rhsystemapi.domain.user.event.UserCreatedEvent;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.Normalizer;
 
@@ -55,6 +56,7 @@ public class CreateUserUseCase {
      * @throws ValidationException if validation fails, containing details of the validation errors
      * @see ValidationException
      */
+    @Transactional
     public UserCreatedPresenter handle(CreateUserRequest request) {
 
         this.validate(request);

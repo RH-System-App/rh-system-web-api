@@ -8,6 +8,7 @@ import com.rhsystem.api.rhsystemapi.domain.user.User;
 import com.rhsystem.api.rhsystemapi.domain.user.UserRepository;
 import com.rhsystem.api.rhsystemapi.infrastructure.event.ApplicationEventDispatcher;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -22,6 +23,7 @@ public class RecoverPasswordUseCase {
 
 //    private final ApplicationMailSender mailSender;
 
+
     public RecoverPasswordUseCase(UserRepository userRepository,
                                   RecoverPasswordRepository recoverPasswordRepository,
                                   ApplicationEventDispatcher eventPublisher) {
@@ -31,6 +33,7 @@ public class RecoverPasswordUseCase {
     }
 
 
+    @Transactional
     public void handle(RecoverPasswordRequest request) {
         var userByEmail = this.userRepository.findByEmail(request.getEmail());
         userByEmail.ifPresent(user -> {

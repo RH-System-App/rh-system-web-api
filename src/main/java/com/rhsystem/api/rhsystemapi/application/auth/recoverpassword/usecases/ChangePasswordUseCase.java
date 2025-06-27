@@ -6,6 +6,7 @@ import com.rhsystem.api.rhsystemapi.domain.recoverpassword.RecoverPasswordReposi
 import com.rhsystem.api.rhsystemapi.domain.user.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Use case for changing the user's password within the application. This class handles
@@ -44,7 +45,7 @@ public class ChangePasswordUseCase {
         this.passwordEncoder = passwordEncoder;
     }
 
-
+    @Transactional
     public void handle(ChangePasswordRequest request) {
         var recoverOpt = this.recoverPasswordRepository.findByRecoverCode(request.getRecoverCode());
         if (recoverOpt.isEmpty()) {
