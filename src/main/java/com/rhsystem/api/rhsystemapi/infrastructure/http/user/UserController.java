@@ -1,4 +1,4 @@
-package com.rhsystem.api.rhsystemapi.application.user.http;
+package com.rhsystem.api.rhsystemapi.infrastructure.http.user;
 
 import com.rhsystem.api.rhsystemapi.application.user.presenters.UserPresenter;
 import com.rhsystem.api.rhsystemapi.application.user.requests.CreateUserRequest;

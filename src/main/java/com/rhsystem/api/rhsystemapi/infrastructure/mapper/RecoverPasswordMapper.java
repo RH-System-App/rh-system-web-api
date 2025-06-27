@@ -1,9 +1,8 @@
-package com.rhsystem.api.rhsystemapi.domain.recoverpassword.mapper;
+package com.rhsystem.api.rhsystemapi.infrastructure.mapper;
 
 import com.rhsystem.api.rhsystemapi.core.ObjectMapper;
 import com.rhsystem.api.rhsystemapi.core.valueobject.EntityKey;
 import com.rhsystem.api.rhsystemapi.domain.recoverpassword.RecoverPassword;
-import com.rhsystem.api.rhsystemapi.domain.user.mapper.UserMapper;
 import com.rhsystem.api.rhsystemapi.infrastructure.persistence.auth.recoverpassword.RecoverPasswordEntity;
 import org.springframework.stereotype.Component;
 

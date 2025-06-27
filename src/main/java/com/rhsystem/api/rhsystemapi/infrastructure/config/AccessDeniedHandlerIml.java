@@ -1,4 +1,4 @@
-package com.rhsystem.api.rhsystemapi.config;
+package com.rhsystem.api.rhsystemapi.infrastructure.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;

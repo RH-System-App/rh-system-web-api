@@ -1,4 +1,4 @@
-package com.rhsystem.api.rhsystemapi.application.auth.authentication.http;
+package com.rhsystem.api.rhsystemapi.infrastructure.http.auth;
 
 import com.rhsystem.api.rhsystemapi.application.auth.authentication.presenters.AuthUserPresenter;
 import com.rhsystem.api.rhsystemapi.application.auth.authentication.requests.AuthRequest;

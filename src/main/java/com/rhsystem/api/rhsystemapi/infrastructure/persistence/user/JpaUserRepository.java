@@ -3,7 +3,7 @@ package com.rhsystem.api.rhsystemapi.infrastructure.persistence.user;
 import com.rhsystem.api.rhsystemapi.domain.user.User;
 import com.rhsystem.api.rhsystemapi.domain.user.UserRepository;
 import com.rhsystem.api.rhsystemapi.domain.user.UserStatus;
-import com.rhsystem.api.rhsystemapi.domain.user.mapper.UserMapper;
+import com.rhsystem.api.rhsystemapi.infrastructure.mapper.UserMapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;

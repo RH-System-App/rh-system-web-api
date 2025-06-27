@@ -3,9 +3,9 @@ package com.rhsystem.api.rhsystemapi.infrastructure.persistence.auth.recoverpass
 import com.rhsystem.api.rhsystemapi.core.ReferenceFinder;
 import com.rhsystem.api.rhsystemapi.domain.recoverpassword.RecoverPassword;
 import com.rhsystem.api.rhsystemapi.domain.recoverpassword.RecoverPasswordRepository;
-import com.rhsystem.api.rhsystemapi.domain.recoverpassword.mapper.RecoverPasswordMapper;
 import com.rhsystem.api.rhsystemapi.domain.user.User;
-import com.rhsystem.api.rhsystemapi.domain.user.mapper.UserMapper;
+import com.rhsystem.api.rhsystemapi.infrastructure.mapper.RecoverPasswordMapper;
+import com.rhsystem.api.rhsystemapi.infrastructure.mapper.UserMapper;
 import com.rhsystem.api.rhsystemapi.infrastructure.persistence.user.UserEntity;
 import org.springframework.stereotype.Repository;
 

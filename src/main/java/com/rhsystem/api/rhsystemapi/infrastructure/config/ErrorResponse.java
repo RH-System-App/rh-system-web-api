@@ -1,4 +1,4 @@
-package com.rhsystem.api.rhsystemapi.config;
+package com.rhsystem.api.rhsystemapi.infrastructure.config;
 
 import java.time.LocalDateTime;
 
