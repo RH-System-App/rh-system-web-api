@@ -1,6 +1,6 @@
 package com.rhsystem.api.rhsystemapi.application.user.http;
 
-import com.rhsystem.api.rhsystemapi.application.user.http.presenters.UserPresenter;
+import com.rhsystem.api.rhsystemapi.application.user.presenters.UserPresenter;
 import com.rhsystem.api.rhsystemapi.application.user.requests.CreateUserRequest;
 import com.rhsystem.api.rhsystemapi.application.user.usecases.BlockUserUseCase;
 import com.rhsystem.api.rhsystemapi.application.user.usecases.CreateUserUseCase;

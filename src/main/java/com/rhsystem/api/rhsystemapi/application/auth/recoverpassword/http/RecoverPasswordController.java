@@ -1,10 +1,5 @@
 package com.rhsystem.api.rhsystemapi.application.auth.recoverpassword.http;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import com.rhsystem.api.rhsystemapi.application.auth.recoverpassword.requests.ChangePasswordRequest;
 import com.rhsystem.api.rhsystemapi.application.auth.recoverpassword.requests.RecoverPasswordRequest;
 import com.rhsystem.api.rhsystemapi.application.auth.recoverpassword.usecases.ChangePasswordUseCase;
@@ -13,17 +8,23 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth/recover-password")
 @Tag(name = "auth")
+@Tag(name = "recover-password", description = "Sevices of recover password")
 public class RecoverPasswordController {
 
     private final RecoverPasswordUseCase recoverPasswordUseCase;
     private final ChangePasswordUseCase changePasswordUseCase;
 
     public RecoverPasswordController(RecoverPasswordUseCase recoverPasswordUseCase,
-            ChangePasswordUseCase changePasswordUseCase) {
+                                     ChangePasswordUseCase changePasswordUseCase) {
         this.recoverPasswordUseCase = recoverPasswordUseCase;
         this.changePasswordUseCase = changePasswordUseCase;
     }
@@ -44,7 +45,6 @@ public class RecoverPasswordController {
         this.changePasswordUseCase.handle(request);
         return ResponseEntity.noContent().build();
     }
-
 
 
 }

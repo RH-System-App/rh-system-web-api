@@ -35,3 +35,6 @@ spring:
 springdoc:
   api-docs:
     path: /api-docs
+application:
+  jwt:
+    secret: 64n6bDHviRfuohMAtXCOAe6bGrGqE4ER1ug3wkS+FrhqVJdAaSf4wsXHKkKTA6Kf4J8lQOVpOCuG6HkPSqwGZg==

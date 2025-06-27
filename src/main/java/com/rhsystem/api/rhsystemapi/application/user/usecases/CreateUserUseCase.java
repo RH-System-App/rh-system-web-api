@@ -1,6 +1,6 @@
 package com.rhsystem.api.rhsystemapi.application.user.usecases;
 
-import com.rhsystem.api.rhsystemapi.application.user.http.presenters.UserCreatedPresenter;
+import com.rhsystem.api.rhsystemapi.application.user.presenters.UserCreatedPresenter;
 import com.rhsystem.api.rhsystemapi.application.user.requests.CreateUserRequest;
 import com.rhsystem.api.rhsystemapi.core.event.EventDispatcher;
 import com.rhsystem.api.rhsystemapi.core.exception.ValidationException;
