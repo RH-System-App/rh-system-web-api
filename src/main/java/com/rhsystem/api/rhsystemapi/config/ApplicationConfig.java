@@ -22,6 +22,8 @@ public class ApplicationConfig {
      */
     private final JwtProperties jwt = new JwtProperties();
 
+    private String version;
+
     /**
      * Retrieves the JWT-related properties from the application configuration.
      *
@@ -30,6 +32,14 @@ public class ApplicationConfig {
      */
     public JwtProperties getJwt() {
         return jwt;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 
     /**

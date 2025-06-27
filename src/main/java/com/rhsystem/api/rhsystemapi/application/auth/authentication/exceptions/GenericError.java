@@ -11,11 +11,11 @@ public class GenericError extends RuntimeException {
 
     private String errorType = "GenericError";
 
-    GenericError(String message) {
+    public GenericError(String message) {
         super(message);
     }
 
-    GenericError(HttpStatus status, String message) {
+    public GenericError(HttpStatus status, String message) {
         super(message);
         this.status = status;
     }

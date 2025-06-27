@@ -24,7 +24,7 @@ public class JWTTokenGenerator implements TokenGenerator<String, User> {
     public String generateToken(User user) {
         final SecureDigestAlgorithm<SecretKey, SecretKey> alg = Jwts.SIG.HS512;
         return Jwts.builder()
-                   .subject(user.getKey().getValue().toString())
+                   .subject(user.getUserName())
                    .issuedAt(new Date())
                    .expiration(new Date(System.currentTimeMillis() + expirationTime))
                    .signWith(getSignKey(), alg)

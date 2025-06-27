@@ -38,3 +38,4 @@ springdoc:
 application:
   jwt:
     secret: 64n6bDHviRfuohMAtXCOAe6bGrGqE4ER1ug3wkS+FrhqVJdAaSf4wsXHKkKTA6Kf4J8lQOVpOCuG6HkPSqwGZg==
+  version: @project.version@
