@@ -2,11 +2,13 @@ package com.rhsystem.api.rhsystemapi.domain.user;
 
 import com.rhsystem.api.rhsystemapi.core.valueobject.DomainEntity;
 
+import java.util.UUID;
+
 /**
  * Represents a user in the system. This class serves as a domain entity that encapsulates
  * the key attributes and functionality related to a user.
  */
-public class User extends DomainEntity {
+public class User extends DomainEntity<UUID> {
 
     /**
      * The name of the user. This field is mapped to the "NAME" column in the database.

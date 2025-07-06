@@ -6,7 +6,7 @@ import com.rhsystem.api.rhsystemapi.domain.user.User;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public class RecoverPassword extends DomainEntity {
+public class RecoverPassword extends DomainEntity<UUID> {
 
     private User user;
     private UUID recoverCode;

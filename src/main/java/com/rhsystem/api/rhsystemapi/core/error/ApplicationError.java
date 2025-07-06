@@ -1,6 +1,7 @@
 package com.rhsystem.api.rhsystemapi.core.error;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
@@ -48,9 +49,10 @@ public class ApplicationError {
      * Represents the HTTP status code associated with the error. This integer value corresponds
      * to the standard HTTP status codes (e.g., 404 for Not Found, 500 for Internal Server Error).
      * <p>
-     * The status code helps categorize the type of error that occurred and provides a way for
+     * The status code helps categorise the type of error that occurred and provides a way for
      * clients to interpret and handle the error appropriately.
      */
+    @Schema(description = "HTTP status code associated with the error", example = "400")
     private HttpStatus status;
 
     /**

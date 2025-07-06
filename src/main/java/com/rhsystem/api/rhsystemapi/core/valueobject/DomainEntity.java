@@ -3,19 +3,20 @@ package com.rhsystem.api.rhsystemapi.core.valueobject;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-public abstract class DomainEntity {
+public abstract class DomainEntity<K> {
 
-    private EntityKey key;
+    private EntityKey<K> key;
 
-    public EntityKey getKey() {
+    public EntityKey<K> getKey() {
         return key;
     }
 
-    public void setKey(EntityKey key) {
+    public void setKey(EntityKey<K> key) {
         this.key = key;
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -25,7 +26,7 @@ public abstract class DomainEntity {
             return false;
         }
 
-        DomainEntity that = (DomainEntity) o;
+        DomainEntity<K> that = (DomainEntity<K>) o;
 
         return new EqualsBuilder().append(key, that.key).isEquals();
     }

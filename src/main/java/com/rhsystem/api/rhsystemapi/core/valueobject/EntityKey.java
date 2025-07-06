@@ -1,19 +1,17 @@
 package com.rhsystem.api.rhsystemapi.core.valueobject;
 
-import java.util.UUID;
-
 /**
  * Represents a unique identifier for an entity in the system. This class extends ValueObject to
  * encapsulate the UUID value.
  */
-public class EntityKey extends ValueObject<UUID> {
+public class EntityKey<K> extends ValueObject<K> {
 
     /**
      * Constructs an EntityKey with the specified UUID value.
      *
      * @param value the UUID value representing the entity key
      */
-    public EntityKey(UUID value) {
+    public EntityKey(K value) {
         super(value);
     }
 
@@ -23,8 +21,8 @@ public class EntityKey extends ValueObject<UUID> {
      * @param value the UUID value to create the EntityKey from
      * @return a new EntityKey instance
      */
-    public static EntityKey of(UUID value) {
-        return new EntityKey(value);
+    public static <K> EntityKey<K> of(K value) {
+        return new EntityKey<>(value);
     }
 
 }
