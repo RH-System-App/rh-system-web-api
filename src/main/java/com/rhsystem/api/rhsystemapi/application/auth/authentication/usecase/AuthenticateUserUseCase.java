@@ -28,7 +28,10 @@ public class AuthenticateUserUseCase {
         var optionalUser = userRepository.findByEmail(request.getUser());
 
         if (optionalUser.isEmpty()) {
-            throw new CredentialsNotMatch();
+            optionalUser = userRepository.findByUserName(request.getUser());
+            if (optionalUser.isEmpty()) {
+                throw new CredentialsNotMatch();
+            }
         }
 
         User user = optionalUser.get();
