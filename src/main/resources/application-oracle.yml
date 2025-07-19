@@ -4,8 +4,6 @@ spring:
     username: RH_SYSTEM
     password: RH_SYSTEM
     driver-class-name: oracle.jdbc.OracleDriver
-  jpa:
-    database-platform: org.hibernate.dialect.OracleDialect
   flyway:
     locations: classpath:db/migration/oracle
     baseline-on-migrate: true
