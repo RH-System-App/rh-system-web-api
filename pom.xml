@@ -37,9 +37,6 @@
                 <artifactId>flyway-core</artifactId>
                 <version>${flyway.version}</version>
             </dependency>
-            <!-- Se usar migrações Java com Oracle e quiser suporte a tipos avançados,
-                 pode ser necessário flyway-database-oracle (editions mais novas separam).
-                 Só adicione se realmente precisar. -->
         </dependencies>
     </dependencyManagement>
     <dependencies>
