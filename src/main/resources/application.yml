@@ -1,10 +1,9 @@
 spring:
+  profiles:
+    active: oracle
   application:
     name: rhsystemapi
   datasource:
-    url: jdbc:postgresql://localhost:5432/rhsystem
-    username: rhsystem
-    password: rhsystem
     hikari:
       pool-name: RhSystemPoll
       minimum-idle: 10

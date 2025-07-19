@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/rhsystem
+    username: rhsystem
+    password: rhsystem
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    locations: classpath:db/migration/postgres
+    baseline-on-migrate: true
