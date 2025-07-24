@@ -1,7 +1,6 @@
 package com.rhsystem.api.rhsystemapi.core.utils;
 
 import org.reflections.Reflections;
-import org.reflections.scanners.Scanners;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
@@ -29,11 +28,15 @@ public class ReflectionUtils {
         return clazz.getAnnotation(annotationClass);
     }
 
+    /**
+     * Retorna todas as classes que estendem (ou implementam) `clazz`.
+     */
+    @SuppressWarnings("unchecked")
     public static <T> Set<Class<? extends T>> getSubClassOf(Class<T> clazz) {
-        Reflections reflections = new Reflections("com.rhsystem.api.rhsystemapi", Scanners.SubTypes);
+        // Exemplo usando org.reflections:
+        Reflections reflections = new Reflections("com.rhsystem.api.rhsystemapi");
         return reflections.getSubTypesOf(clazz);
     }
-
 
     public static <T> T newInstance(Class<T> clazz, Object... args) {
         try {

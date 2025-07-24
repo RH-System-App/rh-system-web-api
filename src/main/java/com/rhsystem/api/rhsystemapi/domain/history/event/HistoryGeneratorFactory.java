@@ -6,42 +6,52 @@ import com.rhsystem.api.rhsystemapi.domain.history.processor.HistoryProvider;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 public class HistoryGeneratorFactory {
 
-    // Mapeia o "nome" (da annotation) para a função que cria o HistoryGenerator
     private static final Map<String, Function<DomainEntity<?>, HistoryGenerator<?>>> generators = new HashMap<>();
 
     static {
-        for (Class<? extends DomainEntity<?>> entityClass
-                : ReflectionUtils.getSubClassOf(DomainEntity.class)) {
+        // 1) receba como Class<?> cru
+        Set<Class<? extends DomainEntity>> rawClasses = ReflectionUtils.getSubClassOf(DomainEntity.class);
 
-            if (ReflectionUtils.hasAnnotation(entityClass, HistoryProvider.class)) {
-                HistoryProvider ann = ReflectionUtils.getAnnotation(entityClass, HistoryProvider.class);
-                String name = ann.value();
-
-                // Supondo que sua annotation também aponte para a classe de HistoryGenerator:
-                @SuppressWarnings("unchecked")
-                Class<? extends HistoryGenerator<?>> generatorClass = ann.generator();
-
-                // Função que, a partir de qualquer Entity, cria o Generator correto
-                Function<DomainEntity<?>, HistoryGenerator<?>> func = entity ->
-                        ReflectionUtils.newInstance(generatorClass, entity);
-
-                generators.put(name, func);
+        for (Class<?> raw : rawClasses) {
+            if (!raw.isAnnotationPresent(HistoryProvider.class)) {
+                continue;
             }
+
+            // 2) faça o cast para o parametrizado
+            @SuppressWarnings("unchecked")
+            Class<? extends DomainEntity<?>> entityClass;
+            entityClass = (Class<? extends DomainEntity<?>>) raw;
+
+            HistoryProvider prov = entityClass.getAnnotation(HistoryProvider.class);
+            String key = prov.value();
+            Class<? extends HistoryGenerator<?>> genClass = prov.generator();
+
+            // 3) registre a função
+            generators.put(key, domain ->
+                    ReflectionUtils.newInstance(genClass, domain)
+            );
         }
     }
 
     @SuppressWarnings("unchecked")
     public static <T extends DomainEntity<?>> HistoryGenerator<T> getGenerator(T entity) {
-        String key = ReflectionUtils.getAnnotation(entity.getClass(), HistoryProvider.class).value();
-        Function<DomainEntity<?>, HistoryGenerator<?>> func = generators.get(key);
-
-        if (func == null) {
-            throw new IllegalArgumentException("Nenhum HistoryGenerator registrado para: " + key);
+        HistoryProvider prov = entity.getClass().getAnnotation(HistoryProvider.class);
+        if (prov == null) {
+            throw new IllegalArgumentException(
+                    "@" + HistoryProvider.class.getSimpleName() +
+                            " ausente em " + entity.getClass().getName());
         }
+
+        Function<DomainEntity<?>, HistoryGenerator<?>> func = generators.get(prov.value());
+        if (func == null) {
+            throw new IllegalStateException("Nenhum generator para key=" + prov.value());
+        }
+
         return (HistoryGenerator<T>) func.apply(entity);
     }
 }
