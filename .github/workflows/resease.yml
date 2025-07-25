@@ -1,8 +1,11 @@
-name: Create Release
+name: Create Release and Bump Minor Version
 
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+  
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -13,13 +16,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Java & Maven
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '17' # ajuste conforme necessário
 
-      - name: Read version from pom.xml
+      - name: Get version from pom.xml
         id: get_version
         run: |
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
@@ -31,35 +34,41 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Checkout develop branch
+      - name: Checkout develop
         run: |
           git checkout develop
           git pull origin develop
 
       - name: Create release branch
         run: |
-          git checkout -b release-${{ steps.get_version.outputs.version }}
-          git push origin release-${{ steps.get_version.outputs.version }}
+          VERSION=${{ steps.get_version.outputs.version }}
+          BASE_VERSION=$(echo "$VERSION" | sed 's/-SNAPSHOT//')
 
-      - name: Bump develop version to next SNAPSHOT
+          MAJOR=$(echo "$BASE_VERSION" | cut -d. -f1)
+          MINOR=$(echo "$BASE_VERSION" | cut -d. -f2)
+          PATCH=$(echo "$BASE_VERSION" | cut -d. -f3)
+
+          RELEASE_BRANCH="release-$BASE_VERSION"
+          echo "Creating branch $RELEASE_BRANCH"
+
+          git checkout -b "$RELEASE_BRANCH"
+          git push origin "$RELEASE_BRANCH"
+          
+      - name: Bump develop version (minor +1)
         run: |
           VERSION=${{ steps.get_version.outputs.version }}
-          echo "Original version: $VERSION"
+          BASE_VERSION=$(echo "$VERSION" | sed 's/-SNAPSHOT//')
+          MAJOR=$(echo "$BASE_VERSION" | cut -d. -f1)
+          MINOR=$(echo "$BASE_VERSION" | cut -d. -f2)
 
-          BASE_VERSION=$(echo "$VERSION" | sed -E 's/-SNAPSHOT//')
-          MAJOR=$(echo $BASE_VERSION | cut -d. -f1)
-          MINOR=$(echo $BASE_VERSION | cut -d. -f2)
-          PATCH=$(echo $BASE_VERSION | cut -d. -f3)
+          NEW_MINOR=$((MINOR + 1))
+          NEXT_VERSION="$MAJOR.$NEW_MINOR.0-SNAPSHOT"
 
-          # Incrementa o PATCH
-          NEW_PATCH=$((PATCH + 1))
-          NEXT_VERSION="$MAJOR.$MINOR.$NEW_PATCH-SNAPSHOT"
-
-          echo "Next SNAPSHOT version: $NEXT_VERSION"
-
+          echo "Bumping develop version to: $NEXT_VERSION"
           mvn versions:set -DnewVersion=$NEXT_VERSION
           mvn versions:commit
 
+          git checkout develop
           git add pom.xml
-          git commit -m "chore: bump develop version to $NEXT_VERSION" || echo "No changes"
+          git commit -m "chore: bump version to $NEXT_VERSION"
           git push origin develop
