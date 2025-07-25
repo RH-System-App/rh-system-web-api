@@ -61,6 +61,18 @@ jobs:
           git push origin main
           git tag -a "v${{ steps.version.outputs.version }}" -m "Release v${{ steps.version.outputs.version }}"
           git push origin "v${{ steps.version.outputs.version }}"
+      
+      - name: Create GitHub Release
+        if: steps.merge.outcome == 'success'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gh
+
+          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+
+          gh release create "v${{ steps.version.outputs.version }}" \
+            --title "Release v${{ steps.version.outputs.version }}" \
+            --notes "Finalização da release v${{ steps.version.outputs.version }} via workflow automatizado"
 
       - name: Create Pull Request via gh (if conflict)
         if: steps.merge.outcome != 'success'
