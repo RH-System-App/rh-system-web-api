@@ -42,15 +42,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .exceptionHandling(ex -> {
-                ex.accessDeniedHandler(accessDeniedHandler);
-                ex.authenticationEntryPoint(applicationAuthenticationEntryPoint);
-            })
-            .authorizeHttpRequests(
-                    authorize -> authorize.requestMatchers(PUBLIC_ROUTES)
-                                          .permitAll().anyRequest().authenticated())
-            .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(ex -> {
+                    ex.accessDeniedHandler(accessDeniedHandler);
+                    ex.authenticationEntryPoint(applicationAuthenticationEntryPoint);
+                })
+                .authorizeHttpRequests(
+                        authorize -> authorize.requestMatchers(PUBLIC_ROUTES)
+                                .permitAll().anyRequest().authenticated())
+                .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
