@@ -1,0 +1,65 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java & Maven
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Read version from pom.xml
+        id: get_version
+        run: |
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "Current version: $VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Checkout develop branch
+        run: |
+          git checkout develop
+          git pull origin develop
+
+      - name: Create release branch
+        run: |
+          git checkout -b release-${{ steps.get_version.outputs.version }}
+          git push origin release-${{ steps.get_version.outputs.version }}
+
+      - name: Bump develop version to next SNAPSHOT
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          echo "Original version: $VERSION"
+
+          BASE_VERSION=$(echo "$VERSION" | sed -E 's/-SNAPSHOT//')
+          MAJOR=$(echo $BASE_VERSION | cut -d. -f1)
+          MINOR=$(echo $BASE_VERSION | cut -d. -f2)
+          PATCH=$(echo $BASE_VERSION | cut -d. -f3)
+
+          # Incrementa o PATCH
+          NEW_PATCH=$((PATCH + 1))
+          NEXT_VERSION="$MAJOR.$MINOR.$NEW_PATCH-SNAPSHOT"
+
+          echo "Next SNAPSHOT version: $NEXT_VERSION"
+
+          mvn versions:set -DnewVersion=$NEXT_VERSION
+          mvn versions:commit
+
+          git add pom.xml
+          git commit -m "chore: bump develop version to $NEXT_VERSION" || echo "No changes"
+          git push origin develop

@@ -1,6 +1,7 @@
 package com.rhsystem.api.rhsystemapi.domain.user;
 
 import com.rhsystem.api.rhsystemapi.core.valueobject.DomainEntity;
+import com.rhsystem.api.rhsystemapi.domain.history.processor.HistoryProvider;
 
 import java.util.UUID;
 
@@ -8,6 +9,7 @@ import java.util.UUID;
  * Represents a user in the system. This class serves as a domain entity that encapsulates
  * the key attributes and functionality related to a user.
  */
+@HistoryProvider(value = UserHistoryGenerator.ENTITY_NAME, generator = UserHistoryGenerator.class)
 public class User extends DomainEntity<UUID> {
 
     /**

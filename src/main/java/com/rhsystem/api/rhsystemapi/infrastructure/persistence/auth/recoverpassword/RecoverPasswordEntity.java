@@ -1,8 +1,11 @@
 package com.rhsystem.api.rhsystemapi.infrastructure.persistence.auth.recoverpassword;
 
+import com.rhsystem.api.rhsystemapi.infrastructure.persistence.converters.UUIDToStringConverter;
 import com.rhsystem.api.rhsystemapi.infrastructure.persistence.user.UserEntity;
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
 
+import java.sql.Types;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -11,7 +14,9 @@ import java.util.UUID;
 public class RecoverPasswordEntity {
 
     @Id
-    @Column(name = "USER_ID", nullable = false)
+    @Column(name = "USER_ID", nullable = false, length = 36)
+    @Convert(converter = UUIDToStringConverter.class)
+    @JdbcTypeCode(Types.VARCHAR)
     private UUID id;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
@@ -19,7 +24,9 @@ public class RecoverPasswordEntity {
     @JoinColumn(name = "USER_ID")
     private UserEntity user;
 
-    @Column(name = "RECOVER_CODE", unique = true, nullable = false, updatable = false)
+    @Column(name = "RECOVER_CODE", length = 36, unique = true, nullable = false, updatable = false)
+    @Convert(converter = UUIDToStringConverter.class)
+    @JdbcTypeCode(Types.VARCHAR)
     private UUID recoverCode;
 
     @Column(name = "EXPIRATION_DATE", nullable = false)

@@ -1,8 +1,11 @@
 package com.rhsystem.api.rhsystemapi.infrastructure.persistence.security.group;
 
+import com.rhsystem.api.rhsystemapi.infrastructure.persistence.converters.UUIDToStringConverter;
 import com.rhsystem.api.rhsystemapi.infrastructure.persistence.security.functionality.FunctionalityEntity;
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
 
+import java.sql.Types;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -17,7 +20,9 @@ public class GroupEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "group_id")
+    @Column(name = "group_id", length = 36)
+    @Convert(converter = UUIDToStringConverter.class)
+    @JdbcTypeCode(Types.VARCHAR)
     private UUID id;
 
     /**
