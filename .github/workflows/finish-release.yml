@@ -35,4 +35,5 @@ jobs:
       - name: Run finish-release script
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: bash .github/scripts/finish_release.sh

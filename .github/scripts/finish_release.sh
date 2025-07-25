@@ -9,8 +9,13 @@ set -euo pipefail
 # - Se houver conflitos, abre PR automático via gh CLI
 # ------------------------------------------------------------------
 
-# 1. Buscar e checar a branch de release remota
+# 0. Verifica token de acesso
+if [ -z "${GITHUB_TOKEN:-}" ]; then
+  echo "❌ GITHUB_TOKEN não definido. Defina o token no workflow env." >&2
+  exit 1
+fi
 
+# 1. Buscar e checar a branch de release remota
 echo "🔍 Buscando branches remotas de release..."
 git fetch --all --prune
 
@@ -58,7 +63,7 @@ if git merge --no-ff "$BRANCH" -m "Merge release $VERSION"; then
 
   # 7. Cria GitHub Release via gh CLI
   echo "🚀 Criando GitHub Release v$VERSION"
-  echo "$GITHUB_TOKEN" | gh auth login --with-token
+  gh auth login --with-token <<< "$GITHUB_TOKEN"
   gh release create "v$VERSION" \
     --title "Release v$VERSION" \
     --notes "Finalização da release v$VERSION via script automatizado"
@@ -68,12 +73,11 @@ else
 
   # 8. Cria PR para resolução manual
 echo "🚀 Criando Pull Request para $BRANCH → main"
-echo "$GITHUB_TOKEN" | gh auth login --with-token
+gh auth login --with-token <<< "$GITHUB_TOKEN"
 gh pr create \
   --base main \
   --head "$BRANCH" \
   --title "Finalize release $VERSION" \
   --body "⚠️ Conflito ao mesclar $BRANCH em main. PR criada para resolução manual."
-
   echo "✅ Pull Request criada"
 fi
