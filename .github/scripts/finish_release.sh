@@ -1,20 +1,14 @@
+# .github/scripts/finish_release.sh
 #!/usr/bin/env bash
 set -euo pipefail
-
-# ------------------------------------------------------------------
-# Script para finalizar a release:
-# - Faz merge da branch atual (release-x.y.z) em main
-# - Cria tag vX.Y.Z
-# - Cria GitHub Release
-# - Se houver conflito, abre PR automático via gh CLI
-# ------------------------------------------------------------------
 
 # 1. Detecta branch de release
 RELEASE_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 echo "🔍 Branch de release detectada: $RELEASE_BRANCH"
 
 # 2. Extrai versão do pom.xml (sem -SNAPSHOT)
-VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')
+VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout \
+  | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')
 echo "🎯 Versão alvo para release: $VERSION"
 
 # 3. Configura usuário Git
@@ -25,39 +19,35 @@ git config user.email "github-actions[bot]@users.noreply.github.com"
 git fetch origin main
 git checkout main
 git reset --hard origin/main
-
 echo "⬇️ main sincronizada com origin/main"
 
-# 5. Tenta merge hardfast-forward
+# 5. Tenta merge fast‑forward
 if git merge --no-ff "$RELEASE_BRANCH" -m "Merge release $VERSION"; then
-  echo "✅ Merge bem-sucedido: $RELEASE_BRANCH → main"
+  echo "✅ Merge bem‑sucedido: $RELEASE_BRANCH → main"
   git push origin main
 
-  # 6. Tag e Release
+  # 6. Tag
   git tag -a "v$VERSION" -m "Release v$VERSION"
   git push origin "v$VERSION"
-
   echo "🏷️ Tag v$VERSION criada"
 
-  # 7. Cria GitHub Release via gh CLI
+  # 7. Cria GitHub Release
   echo "🚀 Criando GitHub Release v$VERSION"
-  echo "$GITHUB_TOKEN" | gh auth login --with-token
+  # O GH CLI usa automaticamente a variável GH_TOKEN para autenticação em Actions
   gh release create "v$VERSION" \
     --title "Release v$VERSION" \
-    --notes "Release automatizado v$VERSION via GitHub Actions"
+    --notes "Release automatizado v$VERSION via GitHub Actions" \
+    --target main
 
   echo "✅ GitHub Release criada"
+
 else
   echo "⚠️ Conflito detectado ao mesclar $RELEASE_BRANCH em main"
-
-  # 8. Criar PR de forma automática
   echo "🔀 Abrindo Pull Request para resolução manual"
-  echo "$GITHUB_TOKEN" | gh auth login --with-token
   gh pr create \
     --base main \
     --head "$RELEASE_BRANCH" \
     --title "Finalize release $VERSION" \
-    --body "⚠️ Conflito ao tentar mesclar $RELEASE_BRANCH em main. Esta PR foi criada para resolver o merge manualmente."
-
+    --body "⚠️ Conflito ao tentar mesclar $RELEASE_BRANCH em main. Resolva manualmente neste PR."
   echo "✅ Pull Request criada"
 fi

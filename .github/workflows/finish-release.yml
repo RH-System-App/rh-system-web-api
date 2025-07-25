@@ -1,10 +1,11 @@
+# .github/workflows/finish-release.yml
 name: Finish Release
 
 on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: write   # para push e criação de tag
   pull-requests: write
 
 jobs:
@@ -32,6 +33,6 @@ jobs:
           sudo apt-get install -y gh
 
       - name: Run finish-release script
-        run: bash .github/scripts/finish_release.sh
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bash .github/scripts/finish_release.sh
