@@ -26,7 +26,6 @@ jobs:
         id: detect_branch
         run: |
           BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
-          echo "Branch detectada: $BRANCH_NAME"
           echo "branch=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
       - name: Setup Java
@@ -40,18 +39,20 @@ jobs:
         run: |
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           CLEAN_VERSION=$(echo "$VERSION" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')
-          echo "Versão extraída: $CLEAN_VERSION"
           echo "version=$CLEAN_VERSION" >> $GITHUB_OUTPUT
 
-      - name: Fetch main branch
+      - name: Fetch all remote branches
+        run: git fetch --all
+
+      - name: Checkout main branch
         run: |
-          git fetch origin main:main
+          git checkout main
+          git reset --hard origin/main
 
       - name: Attempt merge release into main
         id: merge
         continue-on-error: true
         run: |
-          git checkout main
           git merge --no-ff origin/${{ steps.detect_branch.outputs.branch }} -m "Merge release ${{ steps.version.outputs.version }}"
 
       - name: Push changes and create tag
@@ -66,7 +67,7 @@ jobs:
         run: |
           echo "Conflitos detectados. Criando PR automática..."
 
-          git fetch origin ${{ steps.detect_branch.outputs.branch }}:${{ steps.detect_branch.outputs.branch }}
+          git fetch origin ${{ steps.detect_branch.outputs.branch }}
 
           sudo apt-get update
           sudo apt-get install -y gh
@@ -77,4 +78,4 @@ jobs:
             --base main \
             --head ${{ steps.detect_branch.outputs.branch }} \
             --title "Finalize release ${{ steps.version.outputs.version }}" \
-            --body "⚠️ Conflito ao tentar mesclar \`${{ steps.detect_branch.outputs.branch }}\` em \`main\`. Esta PR foi criada automaticamente para finalizar a release manualmente."
+            --body "⚠️ Conflito ao tentar mesclar \`${{ steps.detect_branch.outputs.branch }}\` em \`main\`. Esta PR foi criada automaticamente para revisão manual."
