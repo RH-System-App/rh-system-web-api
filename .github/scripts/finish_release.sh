@@ -9,28 +9,25 @@ set -euo pipefail
 # - Se houver conflitos, abre PR automático via gh CLI
 # ------------------------------------------------------------------
 
-# 0. Verifica token de acesso
+# 0. Verifica token de acesso (usado pelo GH CLI)
 if [ -z "${GITHUB_TOKEN:-}" ]; then
   echo "❌ GITHUB_TOKEN não definido. Defina o token no workflow env." >&2
   exit 1
 fi
 
-# 1. Buscar e checar a branch de release remota
+# 1. Buscar e detectar a branch de release remota
 echo "🔍 Buscando branches remotas de release..."
 git fetch --all --prune
-
-# Pega o primeiro match de origin/release- e remove 'origin/' e espaços
 BRANCH=$(git for-each-ref --format='%(refname:short)' refs/remotes/origin \
   | grep -E '^origin/release-' \
   | sed 's#^origin/##' \
   | head -n1 | xargs)
-
 if [ -z "$BRANCH" ]; then
   echo "❌ Nenhuma branch remota começando com 'release-' encontrada." >&2
   exit 1
 fi
 
-echo "🚀 Fazendo checkout da branch de release: $BRANCH"
+echo "🚀 Fazendo checkout da branch: $BRANCH"
 git checkout -B "$BRANCH" "origin/$BRANCH"
 
 # 2. Extrai versão limpa do pom.xml (sem -SNAPSHOT)
@@ -47,7 +44,6 @@ echo "⬇️ Sincronizando main..."
 git fetch origin main
 git checkout main
 git reset --hard origin/main
-
 echo "main sincronizada"
 
 # 5. Tenta merge da release em main
@@ -61,9 +57,8 @@ if git merge --no-ff "$BRANCH" -m "Merge release $VERSION"; then
   git push origin "v$VERSION"
   echo "🏷️ Tag v$VERSION criada"
 
-  # 7. Cria GitHub Release via gh CLI
+  # 7. Cria GitHub Release (usa GITHUB_TOKEN automaticamente)
   echo "🚀 Criando GitHub Release v$VERSION"
-  gh auth login --with-token <<< "$GITHUB_TOKEN"
   gh release create "v$VERSION" \
     --title "Release v$VERSION" \
     --notes "Finalização da release v$VERSION via script automatizado"
@@ -73,11 +68,10 @@ else
 
   # 8. Cria PR para resolução manual
 echo "🚀 Criando Pull Request para $BRANCH → main"
-gh auth login --with-token <<< "$GITHUB_TOKEN"
-gh pr create \
-  --base main \
-  --head "$BRANCH" \
-  --title "Finalize release $VERSION" \
-  --body "⚠️ Conflito ao mesclar $BRANCH em main. PR criada para resolução manual."
+  gh pr create \
+    --base main \
+    --head "$BRANCH" \
+    --title "Finalize release $VERSION" \
+    --body "⚠️ Conflito ao mesclar $BRANCH em main. PR criada para resolução manual."
   echo "✅ Pull Request criada"
 fi
