@@ -9,7 +9,7 @@ import java.util.UUID;
  * Represents a user in the system. This class serves as a domain entity that encapsulates
  * the key attributes and functionality related to a user.
  */
-@HistoryProvider(value = "Usuário", generator = UserHistoryGenerator.class)
+@HistoryProvider(value = UserHistoryGenerator.ENTITY_NAME, generator = UserHistoryGenerator.class)
 public class User extends DomainEntity<UUID> {
 
     /**

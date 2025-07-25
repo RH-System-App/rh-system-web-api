@@ -12,4 +12,9 @@ public class HistoryJpaRepository implements HistoryRepository {
     public History save(History history) {
         return null;
     }
+
+    @Override
+    public History findByEntityAndEntityKey(String entity, String entityKey) {
+        return null;
+    }
 }

@@ -18,7 +18,7 @@ import java.util.Collection;
 public class History extends DomainEntity<HistoryEntity> {
 
     private User user;
-    private LocalDateTime moment;
+    private LocalDateTime moment = LocalDateTime.now();
     private Collection<HistoryInfo> info = new ArrayList<>();
 
 
