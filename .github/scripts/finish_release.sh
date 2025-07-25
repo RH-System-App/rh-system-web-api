@@ -6,8 +6,9 @@ set -euo pipefail
 # - Busca automaticamente a branch remota com prefixo 'release-'
 # - Faz checkout dela
 # - Remove '-SNAPSHOT' no pom.xml e faz commit nessa branch
-# - Faz merge na main, cria tag e GitHub Release
-# - Se houver conflitos, abre PR automático via gh CLI
+# - Tenta merge na main com resolução automática de conflitos (favor "theirs")
+#   * Se merge automático for bem-sucedido, continua release
+#   * Caso contrário, abre PR para resolução manual
 # ------------------------------------------------------------------
 
 # 0. Verifica token de acesso (usado pelo GH CLI)
@@ -20,7 +21,7 @@ fi
 git config user.name "github-actions[bot]"
 git config user.email "github-actions[bot]@users.noreply.github.com"
 
-# 2. Buscar e detectar a branch de release remota
+# 2. Detecta branch de release remota
 echo "🔍 Buscando branches remotas de release..."
 git fetch --all --prune
 BRANCH=$(git for-each-ref --format='%(refname:short)' refs/remotes/origin \
@@ -35,54 +36,61 @@ fi
 echo "🚀 Fazendo checkout da branch: $BRANCH"
 git checkout -B "$BRANCH" "origin/$BRANCH"
 
-# 3. Remover '-SNAPSHOT' no pom.xml na branch de release
-echo "✂️ Removendo '-SNAPSHOT' do pom.xml na branch $BRANCH"
+# 3. Definindo versão de release (remove -SNAPSHOT)
 VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout \
   | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+' || true)
 echo "🎯 Versão alvo: $VERSION"
 
+# Ajusta pom para release
+echo "✂️ Removendo '-SNAPSHOT' no pom.xml"
 mvn versions:set -DnewVersion=$VERSION
 mvn versions:commit
-
 git add pom.xml
-git commit -m "chore: set release version to $VERSION" || echo "Nenhuma mudança no pom.xml"
+git commit -m "chore: set release version to $VERSION" || echo "Nada para commitar"
 git push origin "$BRANCH"
 
-echo "✅ Pom ajustado na branch $BRANCH"
+echo "✅ pom.xml ajustado na branch $BRANCH"
 
-# 4. Sincroniza main localmente
+# 4. Prepara main localmente
 echo "⬇️ Sincronizando main..."
 git fetch origin main
 git checkout main
 git reset --hard origin/main
-echo "main sincronizada"
+echo "✅ main sincronizada"
 
-# 5. Merge da release em main
-echo "🔀 Tentando merge $BRANCH → main"
-if git merge --no-ff "$BRANCH" -m "Merge release $VERSION"; then
-  echo "✅ Merge bem-sucedido"
-
-  # 6. Push main e cria tag
-  git push origin main
-  git tag -a "v$VERSION" -m "Release v$VERSION"
-  git push origin "v$VERSION"
-  echo "🏷️ Tag v$VERSION criada"
-
-  # 7. Cria GitHub Release via gh CLI
-  echo "🚀 Criando GitHub Release v$VERSION"
-  gh release create "v$VERSION" \
-    --title "Release v$VERSION" \
-    --notes "Release v$VERSION via script automatizado"
-  echo "✅ Release criada"
+# 5. Merge com resolução automática de conflitos
+echo "🔀 Mesclando $BRANCH → main com estratégia -X theirs"
+if git merge --no-ff -X theirs "$BRANCH" -m "Merge release $VERSION"; then
+  echo "✅ Merge automático bem-sucedido"
+  # Continue release
+  RELEASE_OK=true
 else
-  echo "⚠️ Conflito detectado ao mesclar $BRANCH"
+  echo "⚠️ Merge automático encontrou conflitos que não pôde resolver totalmente"
+  RELEASE_OK=false
+fi
 
-  # 8. Cria PR para resolução manual
-echo "🚀 Criando Pull Request para $BRANCH → main"
+# 6. Push main e criar tag/release se merge ok
+echo "⬆️ Push main"
+git push origin main || echo "Nothing to push"
+
+echo "🏷️ Criando tag v$VERSION"
+git tag -a "v$VERSION" -m "Release v$VERSION" || echo "Tag já existe"
+git push origin "v$VERSION" || echo "Tag não enviada"
+
+echo "🚀 Criando GitHub Release v$VERSION"
+gh release create "v$VERSION" \
+  --title "Release v$VERSION" \
+  --notes "Release v$VERSION via script automatizado"
+
+echo "✅ GitHub Release criada"
+
+# 7. Se merge não ok, abre PR para resolução manual
+if [ "$RELEASE_OK" = false ]; then
+  echo "🔀 Abrindo PR para resolver conflitos manualmente"
   gh pr create \
     --base main \
     --head "$BRANCH" \
     --title "Finalize release $VERSION" \
-    --body "⚠️ Conflito ao mesclar $BRANCH em main. PR criada para resolução manual."
+    --body "⚠️ Merge automático de $BRANCH em main gerou conflitos. PR criada para resolução manual."
   echo "✅ Pull Request criada"
 fi
