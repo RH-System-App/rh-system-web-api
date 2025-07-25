@@ -17,51 +17,64 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Java and Git
+      - name: Setup Git and Java
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Detect release branch
+      - name: Detect current branch (release)
         id: detect_branch
         run: |
           BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+          echo "Branch detectada: $BRANCH_NAME"
           echo "branch=$BRANCH_NAME" >> $GITHUB_OUTPUT
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
       - name: Get version from pom.xml
         id: version
         run: |
-          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')
-          echo "Final version (no SNAPSHOT): $VERSION"
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          CLEAN_VERSION=$(echo "$VERSION" | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')
+          echo "Versão extraída: $CLEAN_VERSION"
+          echo "version=$CLEAN_VERSION" >> $GITHUB_OUTPUT
 
-      - name: Fetch main
+      - name: Fetch main branch
         run: |
           git fetch origin main:main
 
-      - name: Try merging release into main
+      - name: Attempt merge release into main
         id: merge
         continue-on-error: true
         run: |
           git checkout main
           git merge --no-ff origin/${{ steps.detect_branch.outputs.branch }} -m "Merge release ${{ steps.version.outputs.version }}"
 
-      - name: Push to main and create tag
+      - name: Push changes and create tag
         if: steps.merge.outcome == 'success'
         run: |
           git push origin main
           git tag -a "v${{ steps.version.outputs.version }}" -m "Release v${{ steps.version.outputs.version }}"
           git push origin "v${{ steps.version.outputs.version }}"
 
-      - name: Create Pull Request if conflict
+      - name: Create Pull Request via gh (if conflict)
         if: steps.merge.outcome != 'success'
-        uses: peter-evans/create-pull-request@v5
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          base: main
-          head: ${{ steps.detect_branch.outputs.branch }}
-          title: "Finalize release ${{ steps.version.outputs.version }}"
-          body: |
-            ⚠️ Conflitos ao tentar mesclar `${{ steps.detect_branch.outputs.branch }}` em `main`.
-            Esta PR foi aberta automaticamente para revisão.
-          draft: false
+        run: |
+          echo "Conflitos detectados. Criando PR automática..."
+
+          git fetch origin ${{ steps.detect_branch.outputs.branch }}:${{ steps.detect_branch.outputs.branch }}
+
+          sudo apt-get update
+          sudo apt-get install -y gh
+
+          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+
+          gh pr create \
+            --base main \
+            --head ${{ steps.detect_branch.outputs.branch }} \
+            --title "Finalize release ${{ steps.version.outputs.version }}" \
+            --body "⚠️ Conflito ao tentar mesclar \`${{ steps.detect_branch.outputs.branch }}\` em \`main\`. Esta PR foi criada automaticamente para finalizar a release manualmente."
