@@ -1,8 +1,11 @@
 package com.rhsystem.api.rhsystemapi.infrastructure.persistence.user;
 
 import com.rhsystem.api.rhsystemapi.domain.user.UserStatus;
+import com.rhsystem.api.rhsystemapi.infrastructure.persistence.converters.UUIDToStringConverter;
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
 
+import java.sql.Types;
 import java.util.UUID;
 
 @Entity
@@ -13,7 +16,9 @@ public class UserEntity {
      */
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "USER_ID")
+    @Column(name = "USER_ID", length = 36)
+    @Convert(converter = UUIDToStringConverter.class)
+    @JdbcTypeCode(Types.VARCHAR)
     private UUID id;
 
     /**
