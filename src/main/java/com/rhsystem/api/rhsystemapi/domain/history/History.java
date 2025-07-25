@@ -15,7 +15,10 @@ import java.util.Collection;
  * The History class serves as a domain entity that organizes and structures historical events
  * for proper auditability and traceability within the system.
  */
-public class History extends DomainEntity<HistoryEntity> {
+public class History extends DomainEntity<HistoryKey> {
+
+    private String entityName;
+    private String entityId;
 
     private User user;
     private LocalDateTime moment = LocalDateTime.now();
@@ -44,5 +47,21 @@ public class History extends DomainEntity<HistoryEntity> {
 
     public void setInfo(Collection<HistoryInfo> info) {
         this.info = info;
+    }
+
+    public String getEntityId() {
+        return entityId;
+    }
+
+    public void setEntityId(String entityId) {
+        this.entityId = entityId;
+    }
+
+    public String getEntityName() {
+        return entityName;
+    }
+
+    public void setEntityName(String entityName) {
+        this.entityName = entityName;
     }
 }
