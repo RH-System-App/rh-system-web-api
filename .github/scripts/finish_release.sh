@@ -10,11 +10,16 @@ set -euo pipefail
 # ------------------------------------------------------------------
 
 # 1. Buscar e checar a branch de release remota
+
 echo "🔍 Buscando branches remotas de release..."
 git fetch --all --prune
 
-# Pega o primeiro match de release-
-BRANCH=$(git branch -r | grep -E 'origin/release-' | sed 's#origin/##' | head -n1)
+# Pega o primeiro match de origin/release- e remove 'origin/' e espaços
+BRANCH=$(git for-each-ref --format='%(refname:short)' refs/remotes/origin \
+  | grep -E '^origin/release-' \
+  | sed 's#^origin/##' \
+  | head -n1 | xargs)
+
 if [ -z "$BRANCH" ]; then
   echo "❌ Nenhuma branch remota começando com 'release-' encontrada." >&2
   exit 1
@@ -24,7 +29,8 @@ echo "🚀 Fazendo checkout da branch de release: $BRANCH"
 git checkout -B "$BRANCH" "origin/$BRANCH"
 
 # 2. Extrai versão limpa do pom.xml (sem -SNAPSHOT)
-VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+')
+VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout \
+  | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+' || true)
 echo "🎯 Versão alvo: $VERSION"
 
 # 3. Configura usuário Git
@@ -68,5 +74,6 @@ gh pr create \
   --head "$BRANCH" \
   --title "Finalize release $VERSION" \
   --body "⚠️ Conflito ao mesclar $BRANCH em main. PR criada para resolução manual."
+
   echo "✅ Pull Request criada"
 fi
