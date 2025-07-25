@@ -5,6 +5,7 @@ set -euo pipefail
 # Script para finalizar a release:
 # - Busca automaticamente a branch remota com prefixo 'release-'
 # - Faz checkout dela
+# - Remove '-SNAPSHOT' no pom.xml e faz commit nessa branch
 # - Faz merge na main, cria tag e GitHub Release
 # - Se houver conflitos, abre PR automático via gh CLI
 # ------------------------------------------------------------------
@@ -30,43 +31,55 @@ fi
 echo "🚀 Fazendo checkout da branch: $BRANCH"
 git checkout -B "$BRANCH" "origin/$BRANCH"
 
-# 2. Extrai versão limpa do pom.xml (sem -SNAPSHOT)
+echo "✂️ Removendo '-SNAPSHOT' do pom.xml na branch $BRANCH"
+# Extrai versão limpa e define no pom
 VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout \
   | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+' || true)
 echo "🎯 Versão alvo: $VERSION"
 
-# 3. Configura usuário Git
+# Atualiza pom.xml para versão de release
+mvn versions:set -DnewVersion=$VERSION
+mvn versions:commit
+
+# Commit e push das alterações na release branch
+git add pom.xml
+git commit -m "chore: set release version to $VERSION" || echo "Nenhuma mudança no pom.xml"
+git push origin "$BRANCH"
+
+echo "✅ Pom ajustado na branch $BRANCH"
+
+# 2. Configura usuário Git
 git config user.name "github-actions[bot]"
 git config user.email "github-actions[bot]@users.noreply.github.com"
 
-# 4. Sincroniza main localmente
+# 3. Sincroniza main localmente
 echo "⬇️ Sincronizando main..."
 git fetch origin main
 git checkout main
 git reset --hard origin/main
 echo "main sincronizada"
 
-# 5. Tenta merge da release em main
+# 4. Tenta merge da release em main
 echo "🔀 Tentando merge $BRANCH → main"
 if git merge --no-ff "$BRANCH" -m "Merge release $VERSION"; then
   echo "✅ Merge bem-sucedido"
 
-  # 6. Push main e cria tag
+  # 5. Push main e cria tag
   git push origin main
   git tag -a "v$VERSION" -m "Release v$VERSION"
   git push origin "v$VERSION"
   echo "🏷️ Tag v$VERSION criada"
 
-  # 7. Cria GitHub Release (usa GITHUB_TOKEN automaticamente)
+  # 6. Cria GitHub Release (usa GITHUB_TOKEN automaticamente)
   echo "🚀 Criando GitHub Release v$VERSION"
   gh release create "v$VERSION" \
     --title "Release v$VERSION" \
-    --notes "Finalização da release v$VERSION via script automatizado"
+    --notes "Release v$VERSION via script automatizado"
   echo "✅ Release criada"
 else
   echo "⚠️ Conflito detectado ao mesclar $BRANCH"
 
-  # 8. Cria PR para resolução manual
+  # 7. Cria PR para resolução manual
 echo "🚀 Criando Pull Request para $BRANCH → main"
   gh pr create \
     --base main \
