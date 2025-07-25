@@ -43,15 +43,17 @@ jobs:
         run: |
           VERSION=${{ steps.get_version.outputs.version }}
           BASE_VERSION=$(echo "$VERSION" | sed 's/-SNAPSHOT//')
+
           MAJOR=$(echo "$BASE_VERSION" | cut -d. -f1)
           MINOR=$(echo "$BASE_VERSION" | cut -d. -f2)
+          PATCH=$(echo "$BASE_VERSION" | cut -d. -f3)
 
-          RELEASE_BRANCH="release-$MAJOR.$MINOR"
-          echo "Creating release branch: $RELEASE_BRANCH"
+          RELEASE_BRANCH="release-$BASE_VERSION"
+          echo "Creating branch $RELEASE_BRANCH"
 
           git checkout -b "$RELEASE_BRANCH"
           git push origin "$RELEASE_BRANCH"
-
+          
       - name: Bump develop version (minor +1)
         run: |
           VERSION=${{ steps.get_version.outputs.version }}
